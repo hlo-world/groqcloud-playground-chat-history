@@ -38,7 +38,7 @@ $(document).ready(function() {
         $('.deleteButton').click(function(event) {
             var summaryElement = $(this).closest('summary');
             var key = summaryElement.text().trim().split(' ')[0];
-            GM_deleteValue(key);
+            GM_deleteValue(keyPrefix + key);
             $(this).closest('li').remove();
         });
     }
@@ -122,9 +122,12 @@ $(document).ready(function() {
 
         function submitHandler() {
             function checkGroupsLength() {
-                var userGroups = $('.h-full.overflow-auto .group:contains("user")');
-                var assistantGroups = $('.h-full.overflow-auto .group:contains("assistant")');
-
+                var userGroups = $('.h-full.overflow-auto .group').filter(function() {
+                    return $(this).find('button:contains("user")').length > 0;
+                });
+                var assistantGroups = $('.h-full.overflow-auto .group').filter(function() {
+                    return $(this).find('button:contains("assistant")').length > 0;
+                });
                 if (userGroups.length !== assistantGroups.length) {
                     setTimeout(checkGroupsLength, 100);
                     return;
@@ -135,7 +138,6 @@ $(document).ready(function() {
                 for (var i = 0; i < userGroups.length; i++) {
                     var userText = userGroups.eq(i).find('textarea').text().replace(/\n/g, '<br>');
                     var assistantText = assistantGroups.eq(i).find('textarea').text().replace(/\n/g, '<br>');
-
                     var interleavedText = (userText || '') + '<br><br>' + (assistantText || '');
                     if (!completeNarrative.includes(interleavedText)) {
                         completeNarrative.push(interleavedText);
