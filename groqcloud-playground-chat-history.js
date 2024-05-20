@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Groqcloud Playground Chat History
-// @version     0.0.9
+// @version     0.1.0
 // @description Adds a Chat History on the sidebar of Groqcloud Playground with locally-stored deletable per-session entries
 // @author      Harris Lo
 // @website     https://github.com/hlo-world/groqcloud-playground-chat-history
@@ -14,9 +14,6 @@
 // ==/UserScript==
 
 $(document).ready(function() {
-    // This currently only works when Stream option is disabled
-    $('#toggle-Stream').click();
-
     // Check if dark mode is enabled
     var isDarkMode = $('.dark').length > 0;
 
@@ -25,7 +22,7 @@ $(document).ready(function() {
 
     // Set the formatted date for this session
     var date = new Date();
-    var formattedDate = date.toLocaleString('en-US').replace(/\s/g, '');
+    var formattedDate = date.toLocaleString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\s/g, '').replace(/M/g, '');
 
     // Set the prefix for GM value store keys
     var keyPrefix = 'Groq';
@@ -110,6 +107,8 @@ $(document).ready(function() {
         }
     `);
 
+    var textSeparation = '<br><hr style="width: 100%; border-color: var(--foreground); border-style: solid;">';
+
     // Function to append textarea content to sidebar when submit request is made
     function addSubmitRequestListener() {
         $('.h-full.overflow-auto').on('keydown', 'textarea.border-input', function(event) {
@@ -132,13 +131,19 @@ $(document).ready(function() {
                     setTimeout(checkGroupsLength, 100);
                     return;
                 }
+                var lastAssistantObject = assistantGroups[assistantGroups.length - 1];
+                // if "●" is shown then completion is not done yet
+                if (lastAssistantObject.textContent.includes("●")) {
+                    setTimeout(checkGroupsLength, 10);
+                    return;
+                }
 
                 var completeNarrative = [];
 
                 for (var i = 0; i < userGroups.length; i++) {
                     var userText = userGroups.eq(i).find('textarea').text().replace(/\n/g, '<br>');
                     var assistantText = assistantGroups.eq(i).find('textarea').text().replace(/\n/g, '<br>');
-                    var interleavedText = (userText || '') + '<br><br>' + (assistantText || '');
+                    var interleavedText = (userText || '') + textSeparation + (assistantText || '');
                     if (!completeNarrative.includes(interleavedText)) {
                         completeNarrative.push(interleavedText);
                     }
@@ -152,7 +157,7 @@ $(document).ready(function() {
                     existingEntry.remove();
                 }
 
-                var flattenedCompleteNarrative = completeNarrative.join('<br><br>')
+                var flattenedCompleteNarrative = completeNarrative.join(textSeparation);
                 $('#groqChatHistorySideBar ul').prepend(createHistoryEntry(formattedDate, flattenedCompleteNarrative));
                 GM_setValue(keyPrefix + formattedDate, flattenedCompleteNarrative);
                 addDeleteHistoryListener();
