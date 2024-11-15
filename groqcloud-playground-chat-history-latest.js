@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Groqcloud Playground Chat History
-// @version     0.2.2
+// @version     0.2.3
 // @description Adds a Chat History on the sidebar of Groqcloud Playground with locally-stored deletable per-session entries
 // @author      Harris Lo
 // @website     https://github.com/hlo-world/groqcloud-playground-chat-history
@@ -189,9 +189,9 @@ $(document).ready(function() {
 
     /*
      * Function to switch playground mode
-     * As of 2024-07-18:
-     *     [0] is Studio mode
-     *     [1] is Chat mode
+     * As of 2024-11-15:
+     *     [0] is Chat mode
+     *     [1] is Studio mode
     */
     function switchPlaygroundMode(mode) {
         // Get the list of mode button elements
@@ -201,5 +201,5 @@ $(document).ready(function() {
     }
 
     addSubmitRequestListener();
-    switchPlaygroundMode(1);
+    switchPlaygroundMode(0);
 });
